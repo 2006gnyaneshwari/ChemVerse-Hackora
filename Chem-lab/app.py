@@ -1,84 +1,136 @@
 import streamlit as st
-import random
 import time
+import random
 
-st.set_page_config(page_title="ChemVerse - Virtual Lab", page_icon="🧪", layout="wide")
+st.set_page_config(page_title="ChemVerse - Lab for Every School", page_icon="🧪", layout="wide")
 
-lang = st.sidebar.selectbox("Language / ಭಾಷೆ / भाषा", ["English", "ಕನ್ನಡ", "हिन्दी"])
-T = {
- "English": {"title":"🧪 ChemVerse - Lab for Every School","sub":"No chemicals. No risk. Just pure science.","react":"Do Reaction","quiz":"Quiz Mode","cert":"Get Certificate"},
- "ಕನ್ನಡ": {"title":"🧪 ಕೆಮ್‌ವರ್ಸ್ - ಪ್ರತಿ ಶಾಲೆಗೂ ಒಂದು ಲ್ಯಾಬ್","sub":"ರಾಸಾಯನಿಕವಿಲ್ಲ. ಅಪಾಯವಿಲ್ಲ. ಶುದ್ಧ ವಿಜ್ಞಾನ.","react":"ಪ್ರತಿಕ್ರಿಯೆ ಮಾಡಿ","quiz":"ಕ್ವಿಜ್ ಮೋಡ್","cert":"ಪ್ರಮಾಣಪತ್ರ ಪಡೆಯಿರಿ"},
- "हिन्दी": {"title":"🧪 केमवर्स - हर स्कूल के लिए लैब","sub":"कोई केमिकल नहीं। कोई खतरा नहीं। सिर्फ विज्ञान।","react":"प्रतिक्रिया करो","quiz":"क्विज़ मोड","cert":"प्रमाणपत्र प्राप्त करें"}
-}[lang]
-
-st.markdown(f"# {T['title']}\n### {T['sub']}")
-st.markdown("---")
-
-reactions = {
-    "Sodium + Water (Highly Reactive!)": {"eq": "2Na + 2H2O → 2NaOH + H2 ↑ + 🔥", "color": "#ff8c00", "effect": "fire", "info": "Most reactive metal - stored in kerosene!"},
-    "Limestone Heating (Decomposition)": {"eq": "CaCO3 --heat--> CaO + CO2 ↑", "color": "#f0f0f0", "effect": "bubbles", "info": "Thermal Decomposition - you asked earlier"},
-    "Silver Chloride (Photo Decomposition)": {"eq": "2AgCl --sunlight--> 2Ag + Cl2", "color": "#c0c0c0", "effect": "smoke", "info": "Least reactive? No, but light sensitive"},
-    "Mercury + Acid (Hg = Hydrargyrum)": {"eq": "Hg + 4HNO3 → Hg(NO3)2 + 2NO2 + 2H2O", "color": "#d9d9d9", "effect": "smoke", "info": "Hg = Liquid Silver - only liquid metal"},
-    "Water Electrolysis": {"eq": "2H2O --electricity--> 2H2 + O2", "color": "#87ceeb", "effect": "bubbles", "info": "Current flows fastest in Silver, then Copper"},
+# --- LANGUAGES ---
+LANG = {
+    "English": {"select": "Select Experiment", "start": "🧪 START REACTION", "equation": "Equation", "obs": "Observation", "risk": "Safety", "quiz": "Take Quiz", "certificate": "Get Certificate"},
+    "Kannada": {"select": "ಪ್ರಯೋಗ ಆಯ್ಕೆಮಾಡಿ", "start": "🧪 ಪ್ರತಿಕ್ರಿಯೆ ಪ್ರಾರಂಭಿಸಿ", "equation": "ಸಮೀಕರಣ", "obs": "ವೀಕ್ಷಣೆ", "risk": "ಸುರಕ್ಷತೆ", "quiz": "ರಸಪ್ರಶ್ನೆ", "certificate": "ಪ್ರಮಾಣಪತ್ರ"},
+    "Hindi": {"select": "प्रयोग चुनें", "start": "🧪 प्रतिक्रिया शुरू करें", "equation": "समीकरण", "obs": "अवलोकन", "risk": "सुरक्षा", "quiz": "क्विज़ लें", "certificate": "प्रमाण पत्र"}
 }
 
-col1, col2 = st.columns([1, 1.2])
+# --- 6 EXPERIMENTS ---
+REACTIONS = {
+    "Sodium + Water (Highly Reactive!) 🔥": {
+        "equation": "2Na + 2H₂O → 2NaOH + H₂ ↑",
+        "obs": "Sodium floats, moves rapidly, fizzes violently and catches fire. Highly Exothermic! Produces Hydrogen gas which burns with pop sound. Temp > 100°C.",
+        "risk": "🔴 HIGH RISK - Never try without teacher. Burns skin.",
+        "emoji": "🔥💥", "color": "orange"
+    },
+    "Acid + Base - Neutralization 🧫": {
+        "equation": "HCl + NaOH → NaCl + H₂O + Heat",
+        "obs": "pH changes from 1 (acid) to 7 (neutral). Solution becomes warm. Salt water formed. Indicator turns from pink to colorless. Most important reaction in daily life.",
+        "risk": "🟢 SAFE - Neutralization removes acidity",
+        "emoji": "💧", "color": "green"
+    },
+    "Copper Sulphate + Iron (Displacement) 🔵➡️🟤": {
+        "equation": "CuSO₄ (blue) + Fe → FeSO₄ (green) + Cu (brown)",
+        "obs": "Blue colour fades to light green! Iron nail gets copper coating. Fe is more reactive than Cu. This proves reactivity series. 5 min process.",
+        "risk": "🟢 SAFE - Classic Class 10th experiment",
+        "emoji": "🔵➡️🟤", "color": "blue"
+    },
+    "Baking Soda + Vinegar (CO₂ Fountain) 🎈": {
+        "equation": "NaHCO₃ + CH₃COOH → CO₂ ↑ + H₂O + CH₃COONa",
+        "obs": "Massive bubbling! CO₂ gas produced inflates balloon. Used in baking, fire extinguisher, volcano model. Lime water turns milky with this gas.",
+        "risk": "🟢 VERY SAFE - Can do at home",
+        "emoji": "🎈🫧", "color": "purple"
+    },
+    "Magnesium + HCl (Hydrogen Test) ✨": {
+        "equation": "Mg + 2HCl → MgCl₂ + H₂ ↑ (Pop test)",
+        "obs": "Magnesium ribbon disappears with fast bubbles. Hydrogen gas burns with 'pop' sound. Fastest reaction in syllabus. Light white precipitate.",
+        "risk": "🟡 MEDIUM - H₂ is flammable, wear goggles",
+        "emoji": "💨✨", "color": "silver"
+    },
+    "Limestone Test - Acid Test for Carbonate 🪨": {
+        "equation": "CaCO₃ + 2HCl → CaCl₂ + CO₂ ↑ + H₂O",
+        "obs": "Limestone chips fizz heavily! Same reaction in caves formation. CO₂ turns lime water milky - confirmatory test for carbonate rocks.",
+        "risk": "🟢 SAFE - Geologists use this daily",
+        "emoji": "🪨💨", "color": "yellow"
+    }
+}
+
+# --- SIDEBAR ---
+with st.sidebar:
+    st.title("🧪 ChemVerse")
+    st.markdown("**Lab for Every School**")
+    lang_choice = st.selectbox("Language / ಭಾಷೆ / भाषा", ["English", "Kannada", "Hindi"])
+    t = LANG[lang_choice]
+    st.divider()
+    st.info(f"Total Experiments: **{len(REACTIONS)}**\n\nWorks on any phone!\nNo chemicals needed.")
+    st.divider()
+    st.markdown("**Tech:** Python + Streamlit\n**For:** Rural Schools")
+
+# --- MAIN ---
+st.title("🧪 ChemVerse - Lab for Every School")
+st.caption("No chemicals. No risk. Just pure science. | ರಾಸಾಯನಿಕಗಳಿಲ್ಲ, ಅಪಾಯವಿಲ್ಲ | कोई केमिकल नहीं, कोई खतरा नहीं")
+st.divider()
+
+col1, col2 = st.columns([1, 1.5])
 
 with col1:
-    st.subheader(f"🧫 {T['react']}")
-    choice = st.selectbox("Select Reaction:", list(reactions.keys()))
-    r = reactions[choice]
-    if st.button(f"🔬 START {T['react'].upper()}", use_container_width=True):
-        st.balloons()
-        beaker = st.empty()
-        for i in range(6):
-            h = 15 + i*14
-            emoji = "🔥" if r['effect']=='fire' else "🫧" if r['effect']=='bubbles' else "💨"
-            beaker.markdown(f"""
-            <div style='height:220px; width:160px; border:4px solid #222; border-radius:0 0 25px 25px; margin:auto; position:relative; overflow:hidden; background:white; box-shadow: 0 10px 20px rgba(0,0,0,0.2);'>
-                <div style='position:absolute; bottom:0; width:100%; height:{h}%; background:{r['color']}; transition:0.4s;'></div>
-                <div style='position:absolute; top:{50-i*5}%; width:100%; text-align:center; font-size:{30+i*3}px;'>{emoji}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            time.sleep(0.25)
-        st.success(f"**Equation:** `{r['eq']}`")
-        st.info(f"**Concept:** {r['info']}")
+    st.subheader(f"1️⃣ {t['select']}")
+    selected = st.selectbox("Choose", list(REACTIONS.keys()), label_visibility="collapsed")
+    data = REACTIONS[selected]
 
-# --- FIXED QUIZ - No more bug ---
+    st.markdown(f"### {t['equation']}")
+    st.code(data['equation'], language="chemistry")
+
+    st.markdown(f"### {t['risk']}")
+    if "HIGH" in data['risk']:
+        st.error(data['risk'])
+    elif "MEDIUM" in data['risk']:
+        st.warning(data['risk'])
+    else:
+        st.success(data['risk'])
+
 with col2:
-    st.subheader(f"🧠 {T['quiz']}")
-    if "quiz_q" not in st.session_state:
-        st.session_state.quiz_q = random.choice([
-            {"q":"Current flows fastest in which element?","o":["Copper","Silver","Gold","Aluminium"],"a":"Silver"},
-            {"q":"Hg full form?","o":["Hydrargyrum","Hydrogenium","High Gas","Hard Glue"],"a":"Hydrargyrum"},
-            {"q":"Least reactive element?","o":["Na","Ne","F","K"],"a":"Ne"},
-            {"q":"Decomposition by sunlight?","o":["Thermal","Photo","Electro","All"],"a":"Photo"},
-            {"q":"Only liquid metal at room temp?","o":["Na","Hg","Br","Fe"],"a":"Hg"},
-        ])
-    q = st.session_state.quiz_q
-    st.write(f"**Q: {q['q']}**")
-    ans = st.radio("Choose:", q['o'], key="ans", label_visibility="collapsed")
+    st.subheader("2️⃣ Reaction Chamber")
+    st.markdown(f"<div style='background-color:#f0f2f6; padding:30px; border-radius:15px; text-align:center; border: 2px dashed {data['color']};'><h1 style='font-size:60px;'>{data['emoji']}</h1><p>Ready to react: <b>{selected}</b></p></div>", unsafe_allow_html=True)
+    st.write("")
+    if st.button(t['start'], use_container_width=True, type="primary"):
+        with st.status(f"Reacting {selected}...", expanded=True) as status:
+            st.write("Mixing chemicals...")
+            time.sleep(0.8)
+            st.write("Observing reaction...")
+            bar = st.progress(0)
+            for i in range(100):
+                time.sleep(0.01)
+                bar.progress(i+1)
+            time.sleep(0.5)
+            status.update(label="Reaction Complete! ✅", state="complete", expanded=False)
 
-    c1, c2 = st.columns(2)
-    if c1.button(T['cert'], use_container_width=True):
-        if ans == q['a']:
-            st.success("✅ Correct!")
-            st.markdown(f"""
-            <div style='border:3px double green; padding:20px; text-align:center; background:#f0fff0;'>
-                <h2>🏆 CHEMVERSE CERTIFICATE</h2>
-                <p>Awarded for Excellence in Virtual Chemistry</p>
-                <p><b>Topic: {choice}</b></p>
-                <p>Question: {q['q']} = {q['a']}</p>
-                <p>HACKORA 2026 - Team of 2 - Dod Ballapur</p>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.error(f"Wrong! Correct is {q['a']}")
-    if c2.button("Next Question", use_container_width=True):
-        del st.session_state.quiz_q
-        st.rerun()
+        st.balloons()
+        st.success(f"**{t['obs']}:** {data['obs']}")
+        st.toast(f"Reaction Success: {selected}", icon="🧪")
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("**Conductivity Ranking (Your Q):**\n1. Silver (100%)\n2. Copper (97%)\n3. Gold (76%)\n4. Al (60%)")
-st.sidebar.markdown("**Team:**\n- Dev 1: Builder\n- Dev 2: Pitch")
-st.sidebar.caption("Pitch: *We built a lab for every school that doesn't have one.*")
+st.divider()
+
+# --- BONUS SECTIONS FOR JUDGES ---
+c1, c2 = st.columns(2)
+with c1:
+    with st.expander("📊 Q? Conductivity Ranking (Why Silver > Copper?) - Click to Show Judges"):
+        st.markdown("""
+        **Top Conductors:**
+        1. **Silver (Ag) - 100%** - Best, but costly
+        2. **Copper (Cu) - 97%** - Used in all wires (cheap + best)
+        3. **Gold (Au) - 76%** - Never rusts, used in satellites
+        4. **Aluminium (Al) - 61%** - Light, used in overhead lines
+
+        **Concept Taught:** Conductivity depends on free electrons!
+        """)
+
+with c2:
+    with st.expander(f"🎯 {t['quiz']} - Interactive"):
+        q = st.radio("Which is the only liquid metal at room temp?", ["Iron", "Mercury (Hg)", "Sodium", "Gold"])
+        if st.button("Submit Answer"):
+            if q == "Mercury (Hg)":
+                st.success("Correct! Hg is liquid! You earned a Certificate 🎓")
+                st.markdown(f"### {t['certificate']}")
+                st.code(f"Certificate of Excellence\nAwarded to: Science Explorer\nFor completing ChemVerse Lab\nDate: 2026", language="text")
+                st.balloons()
+            else:
+                st.error("Try again! Hint: Thermometers use it...")
+
+st.markdown("<center><small>Built for Hackathon | 1 Link = Lab for 10,000 Schools | No chemicals needed</small></center>", unsafe_allow_html=True)
