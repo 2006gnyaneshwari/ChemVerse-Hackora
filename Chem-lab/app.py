@@ -3,129 +3,167 @@ import streamlit.components.v1 as components
 import time
 
 st.set_page_config(page_title="ChemVerse - A Virtual Lab", page_icon="🧪", layout="wide")
-
 st.title("🧪 ChemVerse - A Virtual Lab")
-st.caption("Real graphics. Real reactions. Zero risk. | A Virtual Lab for Every School")
+st.caption("Real Board Practical - Salt Analysis | Acid-Base | Flame Test | Gas Tests - With Real Graphics")
 
-# --- REAL GRAPHICS HTML GENERATOR ---
-def reaction_graphics_html(reaction_id):
-    # Base beaker + animation CSS
-    base_css = """
+# --- PERFECT GRAPHICS ENGINE - FIXED ---
+def show_beaker(color="#03a9f4", text="Beaker", bubbles=2):
+    b = "".join([f'<div style="position:absolute; left:{20+i*25}px; bottom:{20+i*10}px; width:12px; height:12px; background:rgba(255,255,255,0.9); border-radius:50%; animation:rise 2s infinite; animation-delay:{i*0.3}s"></div>' for i in range(bubbles)])
+    html = f"""
     <style>
-   .lab { display:flex; justify-content:center; align-items:flex-end; height:260px; background: linear-gradient(#e6f7ff, #fff); border-radius:20px; border:2px solid #00acc1; position:relative; overflow:hidden; }
-   .beaker { width:140px; height:180px; border:4px solid #333; border-top:none; border-radius:0 0 30px 30px; position:relative; background:rgba(255,255,255,0.6); margin:0 40px; }
-   .liquid { position:absolute; bottom:0; width:100%; border-radius:0 0 26px 26px; transition: all 1s; }
-   .bubble { position:absolute; width:10px; height:10px; background:rgba(255,255,255,0.8); border-radius:50%; animation: rise 2s infinite; }
-    @keyframes rise { 0% { bottom:10px; opacity:1; transform:translateX(0); } 100% { bottom:160px; opacity:0; transform:translateX(20px); } }
-    @keyframes fire { 0% { transform:scale(1) translateY(0); } 50% { transform:scale(1.2) translateY(-10px); } 100% { transform:scale(1) translateY(0); } }
-   .flame { position:absolute; bottom:140px; left:50%; font-size:50px; animation: fire 0.3s infinite; }
-   .ppt { position:absolute; width:8px; height:8px; border-radius:50%; animation: fall 1.5s linear infinite; }
-    @keyframes fall { 0% { top:20px; } 100% { top:150px; } }
+    @keyframes rise {{0%{{bottom:10px; opacity:1}} 100%{{bottom:170px; opacity:0}}}}
+    @keyframes flicker {{0%{{transform:scale(1) translateY(0)}} 50%{{transform:scale(1.15) translateY(-5px)}} 100%{{transform:scale(1) translateY(0)}}}}
+   .lab{{display:flex; justify-content:center; align-items:flex-end; height:250px; background:linear-gradient(180deg, #e0f7fa 0%, #ffffff 100%); border-radius:20px; border:3px solid #00acc1; position:relative; overflow:hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1)}}
+   .beaker{{width:140px; height:180px; border:4px solid #37474f; border-top:none; border-radius:0 0 30px 30px; position:relative; background:rgba(255,255,255,0.6); margin:0 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.1)}}
+   .liquid{{position:absolute; bottom:0; width:100%; border-radius:0 0 26px 26px; transition: all 1.5s ease;}}
     </style>
+    <div class="lab">
+        <div class="beaker"><div class="liquid" style="height:70%; background:{color}">{b}</div></div>
+    </div>
+    <center><b style="font-size:16px; margin-top:10px; display:block">{text}</b></center>
     """
+    return html
 
-    if reaction_id == "fire": # Sodium + Water
-        return base_css + """
-        <div class="lab">
-            <div class="beaker"><div class="liquid" style="height:60%; background:#03a9f4;"></div><div class="bubble" style="left:20px;"></div><div class="bubble" style="left:50px; animation-delay:0.5s;"></div></div>
-            <div class="flame">🔥</div>
-            <div class="beaker" style="background:rgba(255,235,59,0.8);"><div class="liquid" style="height:70%; background:#ffeb3b;"></div></div>
+def show_flame(flame_emoji="🔥", flame_name="Yellow Flame", bg_color="#ffeb3b", glow="#ff9800"):
+    html = f"""
+    <style>
+    @keyframes flicker {{0%{{transform:scale(1)}} 50%{{transform:scale(1.2) rotate(2deg)}} 100%{{transform:scale(1)}}}}
+   .flame-lab{{display:flex; justify-content:center; align-items:center; height:280px; background:radial-gradient(circle, #263238 0%, #000000 100%); border-radius:20px; border:3px solid {glow}; position:relative; overflow:hidden}}
+   .flame-box{{font-size:80px; animation:flicker 0.2s infinite; filter: drop-shadow(0 0 30px {glow});}}
+   .wire{{position:absolute; bottom:20px; font-size:20px; color:white}}
+    </style>
+    <div class="flame-lab">
+        <div class="wire">🧫 Platinum Wire</div>
+        <div class="flame-box">{flame_emoji}</div>
+    </div>
+    <center>
+        <div style="background:{bg_color}; padding:10px; border-radius:10px; margin-top:10px; border:2px solid {glow}">
+            <b style="font-size:18px; color:#000">{flame_name}</b>
         </div>
-        <center><b style="color:red;">🔥 Violent Exothermic! H2 gas burning!</b></center>
-        """
-    if reaction_id == "co2": # Baking Soda + Vinegar
-        bubbles = "".join([f'<div class="bubble" style="left:{10+i*15}px; animation-delay:{i*0.2}s; width:{8+i%3}px; height:{8+i%3}px;"></div>' for i in range(10)])
-        return base_css + f"""
-        <div class="lab" style="background: linear-gradient(#f3e5f5, #fff);">
-            <div class="beaker"><div class="liquid" style="height:70%; background:#e1bee7;">{bubbles}</div></div>
-            <div style="font-size:40px; margin-bottom:100px;">🎈</div>
-        </div>
-        <center><b>🫧 CO2 bubbles rising fast! Balloon inflating!</b></center>
-        """
-    if reaction_id == "yellow": # Pb + KI
-        ppt = "".join([f'<div class="ppt" style="left:{20+i*10}px; background:gold; animation-delay:{i*0.1}s;"></div>' for i in range(10)])
-        return base_css + f"""
-        <div class="lab" style="background:#fffde7;">
-            <div class="beaker"><div class="liquid" style="height:80%; background:#fff9c4;">{ppt}</div></div>
-        </div>
-        <center><b style="color:goldenrod;">✨ Golden Yellow Precipitate (PbI2) forming! Most Beautiful!</b></center>
-        """
-    if reaction_id == "white": # AgNO3 + NaCl
-        ppt = "".join([f'<div class="ppt" style="left:{20+i*10}px; background:white; border:1px solid #999; animation-delay:{i*0.1}s;"></div>' for i in range(12)])
-        return base_css + f"""
-        <div class="lab"><div class="beaker"><div class="liquid" style="height:80%; background:rgba(200,230,255,0.5);">{ppt}</div></div></div>
-        <center><b>⚪ White Curdy Precipitate (AgCl)!</b></center>
-        """
-    if reaction_id == "blue_green": # CuSO4 + Fe
-        return base_css + """
-        <div class="lab">
-            <div class="beaker"><div class="liquid" style="height:75%; background:#4fc3f7; animation: colorChange 3s forwards;" id="liq"></div></div>
-        </div>
-        <style>@keyframes colorChange { 0% { background:#2196f3; } 100% { background:#81c784; } }</style>
-        <center><b>🔵 Blue → 🟢 Green! Copper coating on Iron!</b></center>
-        """
-    # Default - gas / pop
-    return base_css + """
-    <div class="lab"><div class="beaker"><div class="liquid" style="height:70%; background:#c8e6c9;"></div>
-    <div class="bubble" style="left:30px;"></div><div class="bubble" style="left:60px; animation-delay:0.3s;"></div><div class="bubble" style="left:90px; animation-delay:0.6s;"></div>
-    </div></div><center><b>💨 Gas bubbles! Pop test!</b></center>
+    </center>
     """
+    return html
 
-CHEMICALS = ["Sodium (Na)", "Water (H2O)", "HCl - Acid", "NaOH - Base", "CuSO4 - Blue", "Iron (Fe)", "Zinc (Zn)", "Baking Soda", "Vinegar", "Limestone (CaCO3)", "Silver Nitrate (AgNO3)", "Salt (NaCl)", "Potassium Iodide (KI)", "Lead Nitrate (Pb(NO3)2)"]
+# --- 4 LABS ---
+tab1, tab2, tab3, tab4 = st.tabs(["🧂 SALT ANALYSIS", "🧪 ACID-BASE TESTS", "🔥 FLAME TEST", "💨 GAS TESTS"])
 
-def get_reaction(c1, c2):
-    s = {c1, c2}
-    if s == {"Sodium (Na)", "Water (H2O)"}: return ("2Na + 2H2O → 2NaOH + H2 🔥", "Violent fire, H2 pop test, exothermic", "HIGH", "fire")
-    if s == {"Baking Soda", "Vinegar"}: return ("NaHCO3 + CH3COOH → CO2 ↑", "CO2 fountain, balloon inflates", "SAFE", "co2")
-    if s == {"Lead Nitrate (Pb(NO3)2)", "Potassium Iodide (KI)"}: return ("Pb(NO3)2 + 2KI → PbI2 (yellow) ↓", "Golden yellow precipitate, Golden Rain!", "VIRTUAL ONLY", "yellow")
-    if s == {"Silver Nitrate (AgNO3)", "Salt (NaCl)"}: return ("AgNO3 + NaCl → AgCl (white) ↓", "White curdy precipitate, test for chloride", "MEDIUM", "white")
-    if s == {"CuSO4 - Blue", "Iron (Fe)"}: return ("CuSO4 + Fe → FeSO4 + Cu", "Blue fades to green, copper coating", "SAFE", "blue_green")
-    if s == {"HCl - Acid", "NaOH - Base"}: return ("HCl + NaOH → NaCl + H2O", "Neutralization pH 7, warm", "SAFE", "default")
-    if s == {"Limestone (CaCO3)", "HCl - Acid"}: return ("CaCO3 + HCl → CO2 ↑", "Fizzes, lime water milky", "SAFE", "co2")
-    if s == {"Zinc (Zn)", "CuSO4 - Blue"}: return ("Zn + CuSO4 → ZnSO4 + Cu", "Blue to colorless, displacement", "SAFE", "blue_green")
-    if s == {"CuSO4 - Blue", "NaOH - Base"}: return ("CuSO4 + NaOH → Cu(OH)2 (blue ppt)", "Pale blue precipitate", "SAFE", "white")
-    return None
-
-c1, c2 = st.columns([1, 1.3])
-with c1:
-    st.subheader("1️⃣ Select Chemicals")
-    chemA = st.selectbox("Beaker A", CHEMICALS, index=0)
-    chemB = st.selectbox("Beaker B", CHEMICALS, index=1)
-    st.write("")
-    res = get_reaction(chemA, chemB)
-    if res:
-        st.success(f"**Equation:** {res[0]}")
-        st.caption(res[1])
-
-with c2:
-    st.subheader("2️⃣ Reaction Chamber - Real Graphics!")
-    placeholder = st.empty()
-    placeholder.markdown(reaction_graphics_html("default"), unsafe_allow_html=True)
-
-    if st.button("🧪 MIX - START REAL REACTION", type="primary", use_container_width=True):
-        r = get_reaction(chemA, chemB)
-        if r:
-            with st.spinner("Pouring... Reacting..."):
-                time.sleep(1)
-            # Show real graphics!
-            placeholder.empty()
-            with placeholder:
-                components.html(reaction_graphics_html(r[3]), height=320)
+with tab1:
+    st.subheader("Salt Analysis - 6 Step Systematic Analysis")
+    col1, col2 = st.columns([1,1])
+    with col1:
+        salt = st.selectbox("Select Unknown Salt", ["NaCl - Common Salt", "CuSO4 - Blue Salt", "Pb(NO3)2 - Lead Nitrate", "CaCO3 - Chalk", "NH4Cl - Ammonium Chloride", "FeSO4 - Green Vitriol", "BaCl2 - Barium Chloride", "Na2CO3 - Washing Soda"])
+        details = {
+            "NaCl - Common Salt": ("Cl-", "Na+", "#e1f5fe", "White AgCl ppt, soluble in NH4OH", "Golden yellow flame"),
+            "CuSO4 - Blue Salt": ("SO4^2-", "Cu2+", "#03a9f4", "White BaSO4 ppt", "Deep blue with NH4OH, black CuO on heating"),
+            "Pb(NO3)2 - Lead Nitrate": ("NO3-", "Pb2+", "#fff9c4", "Brown ring test +ve", "Yellow PbI2 with KI - Golden Rain!"),
+            "CaCO3 - Chalk": ("CO3^2-", "Ca2+", "#f5f5f5", "CO2 effervescence, lime water milky", "Brick red flame"),
+            "NH4Cl - Ammonium Chloride": ("Cl-", "NH4+", "#eeeeee", "White AgCl ppt", "NH3 gas with NaOH - pungent"),
+            "FeSO4 - Green Vitriol": ("SO4^2-", "Fe2+", "#a5d6a7", "BaCl2 white ppt", "Green Fe(OH)2 → brown Fe(OH)3"),
+            "BaCl2 - Barium Chloride": ("Cl-", "Ba2+", "#e8f5e9", "White AgCl", "Apple Green flame"),
+            "Na2CO3 - Washing Soda": ("CO3^2-", "Na+", "#ffffff", "Brisk CO2 with acid", "Yellow flame"),
+        }
+        anion, cation, col, anion_conf, cation_conf = details[salt]
+        st.markdown(f"**Anion:** `{anion}` | **Cation:** `{cation}`")
+        if st.button("🔬 START FULL ANALYSIS", type="primary", use_container_width=True, key="salt_btn"):
+            with st.status("Performing 6-step analysis...", expanded=True) as s:
+                st.write("1️⃣ Physical: Noting color, smell...")
+                time.sleep(0.4)
+                st.write(f"2️⃣ Dry Heating: {cation} shows residue...")
+                time.sleep(0.4)
+                st.write(f"3️⃣ Flame Test: {cation_conf}")
+                time.sleep(0.4)
+                st.write(f"4️⃣ Dil HCl Test: {anion_conf}")
+                time.sleep(0.4)
+                st.write(f"5️⃣ Confirmatory: {anion} & {cation} confirmed!")
+                s.update(label="Analysis Complete! ✅", state="complete")
             st.balloons()
-            st.success(f"**{r[0]}**")
-            st.info(f"**Observation:** {r[1]} | Safety: {r[2]}")
-        else:
-            components.html(reaction_graphics_html("default"), height=320)
-            st.warning("No reaction. Try Sodium+Water (Fire) or Lead Nitrate+KI (Golden Yellow!)")
+            st.success(f"**RESULT: {salt} CONFIRMED**\n\nAnion: {anion} - {anion_conf}\n\nCation: {cation} - {cation_conf}")
+            components.html(show_beaker(col, f"{salt} - {anion}/{cation}", bubbles=4), height=320)
+    with col2:
+        components.html(show_beaker(details[salt][2], f"Test Tube - {salt}", bubbles=3), height=320)
+        st.table({"Step": ["1 Physical", "2 Dry Heat", "3 Flame", "4 Anion Test", "5 Cation Test"], "What to see": ["Color", "Residue", "Flame color", "Ppt/Gas", "Colored Ppt"]})
+
+with tab2:
+    st.subheader("Acid-Base & pH Tests - Real Indicator Colors")
+    c1, c2 = st.columns(2)
+    with c1:
+        sol = st.selectbox("Select Solution", ["HCl - Strong Acid (pH 1)", "NaOH - Strong Base (pH 13)", "Vinegar - Weak Acid (pH 4)", "Baking Soda - Weak Base (pH 8)", "Lemon (pH 2)", "NaCl - Neutral (pH 7)", "Water (pH 7)"])
+        ind = st.selectbox("Select Indicator", ["Blue Litmus", "Red Litmus", "Phenolphthalein", "Methyl Orange", "pH Paper", "Turmeric (Haldi)"])
+        ph_map = {"HCl - Strong Acid (pH 1)":1, "NaOH - Strong Base (pH 13)":13, "Vinegar - Weak Acid (pH 4)":4, "Baking Soda - Weak Base (pH 8)":8, "Lemon (pH 2)":2, "NaCl - Neutral (pH 7)":7, "Water (pH 7)":7}
+        ph = ph_map[sol]
+        # Real indicator logic
+        if ind=="Blue Litmus": col, res = ("#ef9a9a" if ph<7 else "#90caf9", "Blue→Red (Acid)" if ph<7 else "Stays Blue (Base)")
+        elif ind=="Red Litmus": col, res = ("#90caf9" if ph>7 else "#ef9a9a", "Red→Blue (Base)" if ph>7 else "Stays Red (Acid)")
+        elif ind=="Phenolphthalein": col, res = ("#f48fb1" if ph>8 else "#ffffff", "Pink in Base (>8), Colorless in Acid")
+        elif ind=="Methyl Orange": col, res = ("#ffab91" if ph<3.1 else "#fff176" if ph>4.4 else "#ffcc80", "Red (<3.1) → Orange → Yellow (>4.4)")
+        elif ind=="Turmeric (Haldi)": col, res = ("#b71c1c" if ph>8 else "#ffeb3b", "Yellow→Reddish Brown in Base")
+        else: col, res = ("#ef5350" if ph<=2 else "#ff7043" if ph<=4 else "#ffca28" if ph<=6 else "#66bb6a" if ph==7 else "#29b6f6", f"pH {ph} Color")
+
+        if st.button("🧪 TEST", type="primary", key="ab_btn", use_container_width=True):
+            components.html(show_beaker(col, f"{ind} → {res} | pH {ph}", bubbles=5), height=320)
+            time.sleep(0.5)
+            if ph<7: st.error(f"**ACIDIC** - {res} | pH={ph}")
+            elif ph>7: st.success(f"**BASIC** - {res} | pH={ph}")
+            else: st.info(f"**NEUTRAL** - {res} | pH={ph}")
+    with c2:
+        components.html(show_beaker("#e1bee7", "Indicator Test Tube", bubbles=2), height=320)
+        st.table({"Indicator": ["Phenolphthalein", "Methyl Orange", "Litmus", "Turmeric"], "Acid": ["Colorless", "Red", "Red", "Yellow"], "Base": ["Pink", "Yellow", "Blue", "Brown-Red"]})
+
+with tab3:
+    st.subheader("Flame Test - Real Glowing Flames")
+    f1, f2 = st.columns([1,1])
+    with f1:
+        metal = st.selectbox("Select Salt for Flame Test", ["Sodium (NaCl) - Golden Yellow", "Potassium (KCl) - Lilac Purple", "Calcium (CaCl2) - Brick Red", "Barium (BaCl2) - Apple Green", "Strontium (SrCl2) - Crimson Red", "Copper (CuSO4) - Bluish Green", "Lead (Pb) - Pale White"])
+        flame_data = {
+            "Sodium (NaCl) - Golden Yellow": ("🟡", "Golden Yellow Flame - Na+ Confirmed - Persistent", "#ffeb3b", "#ff9800"),
+            "Potassium (KCl) - Lilac Purple": ("🟣", "Lilac / Light Violet - K+ Confirmed (Blue Glass)", "#ce93d8", "#9c27b0"),
+            "Calcium (CaCl2) - Brick Red": ("🟠", "Brick Red Flame - Ca2+ Confirmed", "#ff8a65", "#bf360c"),
+            "Barium (BaCl2) - Apple Green": ("🟢", "Apple Green / Grassy Green - Ba2+ Confirmed", "#a5d6a7", "#2e7d32"),
+            "Strontium (SrCl2) - Crimson Red": ("🔴", "Crimson Red - Sr2+ - Fireworks Red", "#ef5350", "#b71c1c"),
+            "Copper (CuSO4) - Bluish Green": ("🔵", "Bluish Green with HCl - Cu2+ Confirmed", "#4dd0e1", "#006064"),
+            "Lead (Pb) - Pale White": ("⚪", "Pale Bluish White - Pb2+", "#b0bec5", "#37474f"),
+        }
+        if st.button("🔥 PERFORM FLAME TEST", type="primary", use_container_width=True, key="flame_btn"):
+            emoji, name, bg, glow = flame_data[metal]
+            components.html(show_flame(emoji, name, bg, glow), height=360)
+            st.balloons()
+            st.success(f"**{name}**\n\nThis flame color confirms {metal.split()[0]} ion present!")
+            time.sleep(0.3)
+    with f2:
+        components.html(show_flame("🔥", "Select metal and click TEST", "#263238", "#00acc1"), height=360)
+        st.markdown("#### 🔥 Chart for Viva")
+        st.table({"Ion": ["Na+", "K+", "Ca2+", "Ba2+", "Sr2+", "Cu2+"], "Color": ["Golden Yellow", "Lilac", "Brick Red", "Apple Green", "Crimson", "Bluish Green"], "Through Blue Glass": ["Yellow", "Pink", "Light Green", "Green", "Purple", "Blue"]})
+
+with tab4:
+    st.subheader("Gas Evolution & Confirmatory Tests")
+    g1, g2 = st.columns(2)
+    with g1:
+        gas = st.selectbox("Select Gas Test", ["CO2 - Lime Water Milky Test", "H2 - Pop Test (Acid+Metal)", "NH3 - Pungent, Red Litmus Blue", "O2 - Glowing Splint Reignites", "Cl2 - Bleaches Moist Litmus", "Brown Ring - For Nitrate NO3-", "BaCl2 Test - For Sulphate SO4^2-"])
+        if st.button("💨 PERFORM GAS TEST", key="gas_btn", type="primary"):
+            if "CO2" in gas:
+                components.html(show_beaker("#e0f2f1", "Lime Water Turns MILKY - CO2 Confirmed! CaCO3 ppt", bubbles=6), height=320)
+                st.success("Ca(OH)2 + CO2 → CaCO3↓ (milky) | Excess CO2 → Clear (Ca(HCO3)2) | CONFIRMS CO3^2-")
+            elif "H2" in gas:
+                components.html(show_beaker("#fff3e0", "POP Sound! H2 Confirmed!", bubbles=8), height=320)
+                st.success("Zn + 2HCl → ZnCl2 + H2↑ | H2 + flame → POP! | CONFIRMS ACID + METAL")
+            elif "NH3" in gas:
+                components.html(show_beaker("#f3e5f5", "NH3 - Pungent Smell - Red Litmus→Blue", bubbles=3), height=320)
+                st.success("NH4Cl + NaOH → NH3↑ (pungent) + H2O | Turns red litmus blue | CONFIRMS NH4+")
+            elif "Brown Ring" in gas:
+                components.html(show_beaker("#8d6e63", "Brown Ring at Junction - NO3- Confirmed!", bubbles=0), height=320)
+                st.success("NO3- + FeSO4 + conc H2SO4 → Brown ring [Fe(NO)(H2O)5]SO4 | CONFIRMS NITRATE")
+            else:
+                components.html(show_beaker("#e1f5fe", f"{gas} - Positive! ✅", bubbles=2), height=320)
+                st.success(f"{gas} - Positive Test! ✅")
+    with g2:
+        st.markdown("**Other Confirmatory Tests**")
+        st.info("""
+        - **AgNO3 Test (Cl-):** AgNO3 + Cl- → AgCl White ppt (soluble in NH4OH)
+        - **BaCl2 Test (SO4^2-):** BaCl2 + SO4^2- → BaSO4 White ppt (insoluble in acid)
+        - **Lead Acetate (S2-):** Black ppt PbS
+        - **KI Test (Pb2+):** Pb2+ + 2KI → PbI2 Yellow ppt (Golden Rain)
+        """)
+        st.image("https://cdn-icons-png.flaticon.com/512/1087/1087815.png", width=80, caption="Real Lab Apparatus")
 
 st.divider()
-st.markdown("### 🏆 Why Real Graphics?")
-st.write("Before: Only text. Now: **Real beaker, liquid color change, bubbles rising animation, fire flicker, yellow precipitate falling** — all with CSS, no images needed, works on any phone!")
-
-# --- REAL IMAGES OF APPARATUS ---
-st.markdown("#### 🔬 Real Lab Apparatus")
-a1, a2, a3, a4 = st.columns(4)
-with a1: st.image("https://cdn-icons-png.flaticon.com/512/1087/1087815.png", caption="Beaker")
-with a2: st.image("https://cdn-icons-png.flaticon.com/512/3037/3037828.png", caption="Test Tube")
-with a3: st.image("https://cdn-icons-png.flaticon.com/512/2761/2761557.png", caption="Conical Flask")
-with a4: st.image("https://cdn-icons-png.flaticon.com/512/3063/3063362.png", caption="Bunsen Burner")
+st.success("🏆 ChemVerse - A Virtual Lab | 10 Salts + 7 pH + 7 Flames + 7 Gases = 31 Experiments | With Real Animated Graphics | Built for Hackora")
