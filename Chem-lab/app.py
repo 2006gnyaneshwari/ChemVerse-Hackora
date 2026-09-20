@@ -1,153 +1,131 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import time
-import random
 
 st.set_page_config(page_title="ChemVerse - A Virtual Lab", page_icon="🧪", layout="wide")
 
-# --- TITLE CHANGED AS YOU ASKED ---
-st.markdown("""
-<style>
-.reaction-box {
-    background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
-    padding: 30px; border-radius: 20px; text-align:center;
-    border: 3px dashed #00acc1; min-height: 200px;
-}
-.beaker {
-    display:inline-block; width:80px; height:100px;
-    border:3px solid #333; border-radius: 0 0 20px 20px;
-    margin:10px; line-height:100px; font-size:30px;
-}
-</style>
-""", unsafe_allow_html=True)
+st.title("🧪 ChemVerse - A Virtual Lab")
+st.caption("Real graphics. Real reactions. Zero risk. | A Virtual Lab for Every School")
 
-# --- CHEMICALS ---
-CHEMICALS = {
-    "Sodium (Na)": {"emoji": "🟡", "type": "metal", "color": "#ffeb3b"},
-    "Water (H₂O)": {"emoji": "💧", "type": "liquid", "color": "#03a9f4"},
-    "Hydrochloric Acid (HCl)": {"emoji": "🧴", "type": "acid", "color": "#ffcc80"},
-    "Sodium Hydroxide (NaOH)": {"emoji": "🧪", "type": "base", "color": "#f8bbd0"},
-    "Copper Sulphate (CuSO₄)": {"emoji": "🔵", "type": "salt", "color": "#2196f3"},
-    "Iron Nail (Fe)": {"emoji": "🔩", "type": "metal", "color": "#9e9e9e"},
-    "Baking Soda (NaHCO₃)": {"emoji": "⚪", "type": "salt", "color": "#ffffff"},
-    "Vinegar (CH₃COOH)": {"emoji": "🍶", "type": "acid", "color": "#dcedc8"},
-    "Magnesium (Mg)": {"emoji": "✨", "type": "metal", "color": "#e0e0e0"},
-    "Limestone (CaCO₃)": {"emoji": "🪨", "type": "carbonate", "color": "#fff9c4"},
-}
+# --- REAL GRAPHICS HTML GENERATOR ---
+def reaction_graphics_html(reaction_id):
+    # Base beaker + animation CSS
+    base_css = """
+    <style>
+   .lab { display:flex; justify-content:center; align-items:flex-end; height:260px; background: linear-gradient(#e6f7ff, #fff); border-radius:20px; border:2px solid #00acc1; position:relative; overflow:hidden; }
+   .beaker { width:140px; height:180px; border:4px solid #333; border-top:none; border-radius:0 0 30px 30px; position:relative; background:rgba(255,255,255,0.6); margin:0 40px; }
+   .liquid { position:absolute; bottom:0; width:100%; border-radius:0 0 26px 26px; transition: all 1s; }
+   .bubble { position:absolute; width:10px; height:10px; background:rgba(255,255,255,0.8); border-radius:50%; animation: rise 2s infinite; }
+    @keyframes rise { 0% { bottom:10px; opacity:1; transform:translateX(0); } 100% { bottom:160px; opacity:0; transform:translateX(20px); } }
+    @keyframes fire { 0% { transform:scale(1) translateY(0); } 50% { transform:scale(1.2) translateY(-10px); } 100% { transform:scale(1) translateY(0); } }
+   .flame { position:absolute; bottom:140px; left:50%; font-size:50px; animation: fire 0.3s infinite; }
+   .ppt { position:absolute; width:8px; height:8px; border-radius:50%; animation: fall 1.5s linear infinite; }
+    @keyframes fall { 0% { top:20px; } 100% { top:150px; } }
+    </style>
+    """
 
-# --- REACTION LOGIC ---
+    if reaction_id == "fire": # Sodium + Water
+        return base_css + """
+        <div class="lab">
+            <div class="beaker"><div class="liquid" style="height:60%; background:#03a9f4;"></div><div class="bubble" style="left:20px;"></div><div class="bubble" style="left:50px; animation-delay:0.5s;"></div></div>
+            <div class="flame">🔥</div>
+            <div class="beaker" style="background:rgba(255,235,59,0.8);"><div class="liquid" style="height:70%; background:#ffeb3b;"></div></div>
+        </div>
+        <center><b style="color:red;">🔥 Violent Exothermic! H2 gas burning!</b></center>
+        """
+    if reaction_id == "co2": # Baking Soda + Vinegar
+        bubbles = "".join([f'<div class="bubble" style="left:{10+i*15}px; animation-delay:{i*0.2}s; width:{8+i%3}px; height:{8+i%3}px;"></div>' for i in range(10)])
+        return base_css + f"""
+        <div class="lab" style="background: linear-gradient(#f3e5f5, #fff);">
+            <div class="beaker"><div class="liquid" style="height:70%; background:#e1bee7;">{bubbles}</div></div>
+            <div style="font-size:40px; margin-bottom:100px;">🎈</div>
+        </div>
+        <center><b>🫧 CO2 bubbles rising fast! Balloon inflating!</b></center>
+        """
+    if reaction_id == "yellow": # Pb + KI
+        ppt = "".join([f'<div class="ppt" style="left:{20+i*10}px; background:gold; animation-delay:{i*0.1}s;"></div>' for i in range(10)])
+        return base_css + f"""
+        <div class="lab" style="background:#fffde7;">
+            <div class="beaker"><div class="liquid" style="height:80%; background:#fff9c4;">{ppt}</div></div>
+        </div>
+        <center><b style="color:goldenrod;">✨ Golden Yellow Precipitate (PbI2) forming! Most Beautiful!</b></center>
+        """
+    if reaction_id == "white": # AgNO3 + NaCl
+        ppt = "".join([f'<div class="ppt" style="left:{20+i*10}px; background:white; border:1px solid #999; animation-delay:{i*0.1}s;"></div>' for i in range(12)])
+        return base_css + f"""
+        <div class="lab"><div class="beaker"><div class="liquid" style="height:80%; background:rgba(200,230,255,0.5);">{ppt}</div></div></div>
+        <center><b>⚪ White Curdy Precipitate (AgCl)!</b></center>
+        """
+    if reaction_id == "blue_green": # CuSO4 + Fe
+        return base_css + """
+        <div class="lab">
+            <div class="beaker"><div class="liquid" style="height:75%; background:#4fc3f7; animation: colorChange 3s forwards;" id="liq"></div></div>
+        </div>
+        <style>@keyframes colorChange { 0% { background:#2196f3; } 100% { background:#81c784; } }</style>
+        <center><b>🔵 Blue → 🟢 Green! Copper coating on Iron!</b></center>
+        """
+    # Default - gas / pop
+    return base_css + """
+    <div class="lab"><div class="beaker"><div class="liquid" style="height:70%; background:#c8e6c9;"></div>
+    <div class="bubble" style="left:30px;"></div><div class="bubble" style="left:60px; animation-delay:0.3s;"></div><div class="bubble" style="left:90px; animation-delay:0.6s;"></div>
+    </div></div><center><b>💨 Gas bubbles! Pop test!</b></center>
+    """
+
+CHEMICALS = ["Sodium (Na)", "Water (H2O)", "HCl - Acid", "NaOH - Base", "CuSO4 - Blue", "Iron (Fe)", "Zinc (Zn)", "Baking Soda", "Vinegar", "Limestone (CaCO3)", "Silver Nitrate (AgNO3)", "Salt (NaCl)", "Potassium Iodide (KI)", "Lead Nitrate (Pb(NO3)2)"]
+
 def get_reaction(c1, c2):
-    combo = set([c1, c2])
-    if combo == {"Sodium (Na)", "Water (H₂O)"}:
-        return {"equation": "2Na + 2H₂O → 2NaOH + H₂ ↑ 🔥", "obs": "VIOLENT! Sodium floats, fizzes, catches fire! Exothermic, H₂ gas pop test. HIGHLY DANGEROUS in real lab!", "risk": "🔴 HIGH RISK", "anim": "🔥💥💨"}
-    if combo == {"Hydrochloric Acid (HCl)", "Sodium Hydroxide (NaOH)"}:
-        return {"equation": "HCl + NaOH → NaCl + H₂O + Heat", "obs": "Neutralization! Acid + Base = Salt + Water. pH becomes 7 (neutral). Solution becomes slightly warm. Indicator color disappears.", "risk": "🟢 SAFE", "anim": "💧➡️✨"}
-    if combo == {"Copper Sulphate (CuSO₄)", "Iron Nail (Fe)"}:
-        return {"equation": "CuSO₄ (blue) + Fe → FeSO₄ (green) + Cu (brown coating)", "obs": "DISPLACEMENT! Blue color fades to green! Iron gets copper coating. Fe is more reactive than Cu. Class 10 NCERT experiment.", "risk": "🟢 SAFE - Classic school experiment", "anim": "🔵➡️🟢 + 🟤"}
-    if combo == {"Baking Soda (NaHCO₃)", "Vinegar (CH₃COOH)"}:
-        return {"equation": "NaHCO₃ + CH₃COOH → CO₂ ↑ + H₂O + CH₃COONa", "obs": "CO₂ Fountain! Massive bubbling! Gas inflates balloon. CO₂ turns lime water milky. Used in volcano model & fire extinguisher.", "risk": "🟢 VERY SAFE - Home experiment", "anim": "🫧🎈💨"}
-    if combo == {"Magnesium (Mg)", "Hydrochloric Acid (HCl)"}:
-        return {"equation": "Mg + 2HCl → MgCl₂ + H₂ ↑ (Pop test)", "obs": "Magnesium disappears with fast bubbles! H₂ gas burns with POP sound. Fastest reaction. White salt left behind.", "risk": "🟡 MEDIUM - H₂ flammable", "anim": "✨💨💥"}
-    if combo == {"Limestone (CaCO₃)", "Hydrochloric Acid (HCl)"}:
-        return {"equation": "CaCO₃ + 2HCl → CaCl₂ + CO₂ ↑ + H₂O", "obs": "Limestone fizzes heavily! Test for carbonate rocks. Geologists use this. CO₂ turns lime water milky = confirmation.", "risk": "🟢 SAFE", "anim": "🪨💨🧪"}
-    if combo == {"Limestone (CaCO₃)", "Vinegar (CH₃COOH)"}:
-        return {"equation": "CaCO₃ + 2CH₃COOH → CO₂ ↑ + H₂O + (CH₃COO)₂Ca", "obs": "Slow fizzing! Weaker acid, same CO₂ gas but slower. Good for comparing strong vs weak acid.", "risk": "🟢 SAFE", "anim": "🪨🫧"}
+    s = {c1, c2}
+    if s == {"Sodium (Na)", "Water (H2O)"}: return ("2Na + 2H2O → 2NaOH + H2 🔥", "Violent fire, H2 pop test, exothermic", "HIGH", "fire")
+    if s == {"Baking Soda", "Vinegar"}: return ("NaHCO3 + CH3COOH → CO2 ↑", "CO2 fountain, balloon inflates", "SAFE", "co2")
+    if s == {"Lead Nitrate (Pb(NO3)2)", "Potassium Iodide (KI)"}: return ("Pb(NO3)2 + 2KI → PbI2 (yellow) ↓", "Golden yellow precipitate, Golden Rain!", "VIRTUAL ONLY", "yellow")
+    if s == {"Silver Nitrate (AgNO3)", "Salt (NaCl)"}: return ("AgNO3 + NaCl → AgCl (white) ↓", "White curdy precipitate, test for chloride", "MEDIUM", "white")
+    if s == {"CuSO4 - Blue", "Iron (Fe)"}: return ("CuSO4 + Fe → FeSO4 + Cu", "Blue fades to green, copper coating", "SAFE", "blue_green")
+    if s == {"HCl - Acid", "NaOH - Base"}: return ("HCl + NaOH → NaCl + H2O", "Neutralization pH 7, warm", "SAFE", "default")
+    if s == {"Limestone (CaCO3)", "HCl - Acid"}: return ("CaCO3 + HCl → CO2 ↑", "Fizzes, lime water milky", "SAFE", "co2")
+    if s == {"Zinc (Zn)", "CuSO4 - Blue"}: return ("Zn + CuSO4 → ZnSO4 + Cu", "Blue to colorless, displacement", "SAFE", "blue_green")
+    if s == {"CuSO4 - Blue", "NaOH - Base"}: return ("CuSO4 + NaOH → Cu(OH)2 (blue ppt)", "Pale blue precipitate", "SAFE", "white")
     return None
 
-# --- HEADER - TITLE CHANGED ---
-st.markdown("# 🧪 ChemVerse - A Virtual Lab")
-st.caption("No chemicals. No risk. Just pure science. | ರಾಸಾಯನಿಕಗಳಿಲ್ಲ, ಅಪಾಯವಿಲ್ಲ | कोई केमिकल नहीं, कोई खतरा नहीं")
-st.info("💡 **How to use:** Select 2 chemicals from below → Drop them in Reaction Chamber → Click MIX!")
-st.divider()
-
-col1, col2 = st.columns([1, 1.3])
-
-with col1:
-    st.subheader("1️⃣ Select Chemicals")
-    c1 = st.selectbox("Beaker 1 - Chemical A", list(CHEMICALS.keys()), index=0)
-    c2 = st.selectbox("Beaker 2 - Chemical B", list(CHEMICALS.keys()), index=1)
-
-    st.write("")
-    st.markdown(f"""
-    <div style="display:flex; justify-content:center;">
-        <div class="beaker" style="background:{CHEMICALS[c1]['color']}">{CHEMICALS[c1]['emoji']}</div>
-        <div style="line-height:120px; font-size:30px;">+</div>
-        <div class="beaker" style="background:{CHEMICALS[c2]['color']}">{CHEMICALS[c2]['emoji']}</div>
-    </div>
-    <center><b>{c1}</b> + <b>{c2}</b></center>
-    """, unsafe_allow_html=True)
-
-    st.write("")
-    reaction = get_reaction(c1, c2)
-    if reaction:
-        st.success(f"**Expected:** {reaction['equation']}")
-    else:
-        st.warning("⚠️ No reaction / Unknown combination - Try in real lab? But here it's safe to try!")
-
-with col2:
-    st.subheader("2️⃣ Reaction Chamber - Do it Manually!")
-
-    chamber_placeholder = st.empty()
-    chamber_placeholder.markdown(f"""
-    <div class="reaction-box">
-        <h1>🧫 Empty Chamber</h1>
-        <p>Drop chemicals here</p>
-        <h2>{CHEMICALS[c1]['emoji']} + {CHEMICALS[c2]['emoji']}</h2>
-        <small>Ready to mix</small>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.write("")
-    mix_btn = st.button("🧪 MIX CHEMICALS - START REACTION", use_container_width=True, type="primary")
-
-    if mix_btn:
-        result = get_reaction(c1, c2)
-        if result:
-            with st.status(f"Mixing {c1} + {c2}...", expanded=True) as status:
-                st.write("Pouring chemicals...")
-                time.sleep(0.5)
-                st.write("Molecules colliding...")
-                prog = st.progress(0)
-                for i in range(100):
-                    time.sleep(0.01)
-                    prog.progress(i+1)
-                status.update(label="Reaction Complete! ✅", state="complete", expanded=False)
-
-            chamber_placeholder.markdown(f"""
-            <div class="reaction-box" style="background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%); border-color: #ff9800;">
-                <h1 style="font-size:50px;">{result['anim']}</h1>
-                <h3>{result['equation']}</h3>
-                <p><b>Reaction Done!</b></p>
-            </div>
-            """, unsafe_allow_html=True)
-            st.balloons()
-            st.success(f"**Observation:** {result['obs']}")
-            if "HIGH" in result['risk']:
-                st.error(f"**Safety:** {result['risk']} - In real lab, wear goggles & gloves!")
-            else:
-                st.info(f"**Safety:** {result['risk']}")
-        else:
-            chamber_placeholder.markdown(f"""
-            <div class="reaction-box" style="background:#ffebee;">
-                <h1>😶 No Reaction</h1>
-                <p>{c1} + {c2} don't react at room temp</p>
-                <p>Try another combination!</p>
-            </div>
-            """, unsafe_allow_html=True)
-            st.warning("No visible reaction. Try: Sodium+Water, Acid+Base, CuSO₄+Iron...")
-
-st.divider()
-c1, c2 = st.columns(2)
+c1, c2 = st.columns([1, 1.3])
 with c1:
-    with st.expander("📊 Q? Conductivity Ranking (Why Silver > Copper?)"):
-        st.markdown("1. **Silver (Ag) 100%** - Best conductor\n2. **Copper (Cu) 97%** - Used in wires (cheap)\n3. **Gold (Au) 76%** - Never rusts, satellites\n4. **Aluminium (Al) 61%** - Light, overhead lines")
-with c2:
-    with st.expander("🎯 Take Quiz - Interactive"):
-        q = st.radio("Which gas is produced when Baking Soda + Vinegar mix?", ["O₂", "H₂", "CO₂", "N₂"])
-        if st.button("Submit"):
-            if q == "CO₂":
-                st.success("Correct! CO₂ inflates balloon! 🎈 Certificate: Science Explorer 2026")
-                st.balloons()
-            else:
-                st.error("Hint: Lime water turns milky with this gas...")
+    st.subheader("1️⃣ Select Chemicals")
+    chemA = st.selectbox("Beaker A", CHEMICALS, index=0)
+    chemB = st.selectbox("Beaker B", CHEMICALS, index=1)
+    st.write("")
+    res = get_reaction(chemA, chemB)
+    if res:
+        st.success(f"**Equation:** {res[0]}")
+        st.caption(res[1])
 
-st.markdown("<center><small>Built for Hackathon | A Virtual Lab - 1 Link = Lab for 10,000 Schools | No chemicals needed</small></center>", unsafe_allow_html=True)
+with c2:
+    st.subheader("2️⃣ Reaction Chamber - Real Graphics!")
+    placeholder = st.empty()
+    placeholder.markdown(reaction_graphics_html("default"), unsafe_allow_html=True)
+
+    if st.button("🧪 MIX - START REAL REACTION", type="primary", use_container_width=True):
+        r = get_reaction(chemA, chemB)
+        if r:
+            with st.spinner("Pouring... Reacting..."):
+                time.sleep(1)
+            # Show real graphics!
+            placeholder.empty()
+            with placeholder:
+                components.html(reaction_graphics_html(r[3]), height=320)
+            st.balloons()
+            st.success(f"**{r[0]}**")
+            st.info(f"**Observation:** {r[1]} | Safety: {r[2]}")
+        else:
+            components.html(reaction_graphics_html("default"), height=320)
+            st.warning("No reaction. Try Sodium+Water (Fire) or Lead Nitrate+KI (Golden Yellow!)")
+
+st.divider()
+st.markdown("### 🏆 Why Real Graphics?")
+st.write("Before: Only text. Now: **Real beaker, liquid color change, bubbles rising animation, fire flicker, yellow precipitate falling** — all with CSS, no images needed, works on any phone!")
+
+# --- REAL IMAGES OF APPARATUS ---
+st.markdown("#### 🔬 Real Lab Apparatus")
+a1, a2, a3, a4 = st.columns(4)
+with a1: st.image("https://cdn-icons-png.flaticon.com/512/1087/1087815.png", caption="Beaker")
+with a2: st.image("https://cdn-icons-png.flaticon.com/512/3037/3037828.png", caption="Test Tube")
+with a3: st.image("https://cdn-icons-png.flaticon.com/512/2761/2761557.png", caption="Conical Flask")
+with a4: st.image("https://cdn-icons-png.flaticon.com/512/3063/3063362.png", caption="Bunsen Burner")
